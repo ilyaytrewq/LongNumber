@@ -49,8 +49,8 @@ LongNumber::LongNumber::LongNumber(long double number, unsigned int _precision)
     {
         return;
     }
-    if(number < 0)
-        number = -number;
+
+    number = abs(number);
     int exp;
     long double mnt = std::frexp(number, &exp);
 
@@ -103,11 +103,7 @@ LongNumber::LongNumber(const LongNumber &other)
     sign = other.sign;
 }
 
-LongNumber::~LongNumber()
-{
-    bits.clear();
-    bits.shrink_to_fit();
-}
+LongNumber::~LongNumber() {}
 
 int LongNumber::get_magnitude() const
 {
@@ -404,6 +400,10 @@ LongNumber LongNumber::operator/(const LongNumber &other) const
 
     dividend.make_fixed_precision(max_precision);
 
+    res.sign = (dividend.sign == divisor.sign);
+    dividend.sign = true;
+    divisor.sign = true;
+
     LongNumber temp(0, max_precision);
 
     for (int i = 0; i < (int)dividend.bits.size(); ++i)
@@ -446,44 +446,4 @@ std::ostream &operator<<(std::ostream &out, const LongNumber &number)
 LongNumber operator""_longnum(long double number)
 {
     return LongNumber(number, Max_Precision);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-main
-*/
-
-
-
-
-int main() {
-    int n;
-    std::cin >> n;
-    for(int i = 0; i < n; ++i){
-        long double a, b;
-        std::cin >> a >> b;
-        LongNumber A(a, 10), B(b, 10);
-        std::cout << "Numbers A and B\n";
-        std::cout << A << '\n' << B << '\n';
-        std::cout << "A + B\n" << A + B << '\n';
-        std::cout << "A - B\n" << A - B << "\n";
-        std::cout << "A * B\n" << A * B << "\n";
-        std::cout << "A / B\n" << A / B << '\n';
-    }
-
-    return 0;
 }
