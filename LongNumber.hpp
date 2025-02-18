@@ -34,6 +34,8 @@ public:
 
     LongNumber(int, unsigned int);
 
+    LongNumber(double, unsigned int);
+
     LongNumber(long double, unsigned int);
 
     LongNumber(std::string, unsigned int);
@@ -67,6 +69,8 @@ public:
     LongNumber operator<<(unsigned int shift) const;
 
     LongNumber operator>>(unsigned int shift) const;
+
+    long double getValue() const;
 
     friend std::ostream& operator<<(std::ostream& out, const LongNumber& number);
 };
