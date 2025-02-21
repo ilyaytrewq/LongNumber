@@ -26,7 +26,7 @@ int main() {
     for(int i = 0; i < n; ++i){
         long double a, b;
         std::cin >> a >> b;
-        LongNumber A(a, 10), B(b, 10);
+        LongNumber A(a, 20), B(b, 20);
         std::cout << "Numbers A and B\n";
         std::cout << A << '\n' << B << '\n';
         std::cout << "A + B\n" << A + B << '\n';

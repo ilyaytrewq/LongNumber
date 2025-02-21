@@ -9,27 +9,34 @@
 LongNumber computePi(unsigned int precision)
 {
     LongNumber pi(0, precision);
-    LongNumber term(4, precision);        // Каждый член ряда умножается на 4
-    LongNumber denominator(1, precision); // Знаменатель ряда (1, 3, 5, 7, ...)
-    LongNumber two(2, precision);
+    LongNumber n0{1, precision};
+    LongNumber n(16, precision);
 
-    for (unsigned int i = 0; i < precision; ++i)
-    { // Умножаем на 10 для увеличения точности
-        // Вычисление следующего члена ряда
-        LongNumber fraction = term / denominator;
+    LongNumber a0{4, precision};
+    LongNumber b0{2, precision};
+    LongNumber c0{1, precision};
+    LongNumber d0{1, precision};
 
-        // Суммирование с учетом знака
-        if (i % 2 == 0)
-        {
-            pi = pi + fraction; // Добавляем для четных индексов
-        }
-        else
-        {
-            pi = pi - fraction; // Вычитаем для нечетных индексов
-        }
+    LongNumber a(1, precision);
+    LongNumber b(4, precision);
+    LongNumber c(5, precision);
+    LongNumber d(6, precision);
 
-        // Увеличиваем знаменатель на 2 (3, 5, 7, 9,...)
-        denominator = denominator + two;
+    LongNumber eight(8, precision);
+
+    if (precision == 0)
+    {
+        pi = pi + LongNumber(3, precision);
+    }
+
+    for (auto k = 0; k < precision; ++k)
+    {
+        pi = pi + n0 * (a0 / a - b0 / b - c0 / c - d0 / d);
+        n0 = n0 / n;
+        a = a + eight;
+        b = b + eight;
+        c = c + eight;
+        d = d + eight;
     }
 
     return pi;
@@ -43,15 +50,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Чтение количества десятичных разрядов из аргумента командной строки
     unsigned int precision = std::stoi(argv[1]);
 
-    // Вычисление числа Пи с заданной точностью
     LongNumber pi = computePi(precision * 4);
 
-    // Вывод числа Пи с заданной точностью
-    std::cout << "Pi with " << precision << " decimal places: ";
-    std::cout << pi << std::endl;
+    std::cout << pi << '\n'
+              << std::fixed << std::setprecision(precision) <<  pi.getValue() << '\n';
 
     return 0;
 }

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <string>
 
+#define Max_Precision 1000
+
 class LongNumber
 {
 private:
@@ -29,18 +31,24 @@ private:
 
     LongNumber diff_of_positive(const LongNumber &number1, const LongNumber &number2) const;
 
+    std::string multiplyByTwo(const std::string &s) const;
+
+    std::string divideByTwo(const std::string &s) const;
+
+    std::string addTwoStrings(const std::string &num1, const std::string &num2) const;
+
 public:
     LongNumber();
 
-    LongNumber(int, unsigned int);
+    LongNumber(int, unsigned int = Max_Precision);
 
-    LongNumber(double, unsigned int);
+    LongNumber(double, unsigned int = Max_Precision);
 
-    LongNumber(long double, unsigned int);
+    LongNumber(long double, unsigned int = Max_Precision);
 
-    LongNumber(std::string, unsigned int);
+    LongNumber(std::string, unsigned int = Max_Precision);
 
-    LongNumber(const LongNumber & other);
+    LongNumber(const LongNumber &other);
 
     ~LongNumber();
 
@@ -70,9 +78,9 @@ public:
 
     LongNumber operator>>(unsigned int shift) const;
 
-    long double getValue() const;
+    std::string getValue() const;
 
-    friend std::ostream& operator<<(std::ostream& out, const LongNumber& number);
+    friend std::ostream &operator<<(std::ostream &out, const LongNumber &number);
 };
 
 LongNumber operator"" _longnum(long double number);
