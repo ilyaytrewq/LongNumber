@@ -35,7 +35,8 @@ private:
 
     std::string divideByTwo(const std::string &s) const;
 
-    std::string addTwoStrings(const std::string &num1, const std::string &num2) const;
+    std::string addTwoStrings(const std::string &num1, const std::string &num2, int type = 0) const;
+
 
 public:
     LongNumber();

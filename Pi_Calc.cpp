@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     LongNumber pi = computePi(precision * 4);
 
     std::cout << pi << '\n'
-              << std::fixed << std::setprecision(precision) <<  pi.getValue() << '\n';
+              << pi.getValue() << '\n';
 
     return 0;
 }

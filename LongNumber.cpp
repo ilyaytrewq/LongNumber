@@ -428,7 +428,8 @@ LongNumber LongNumber::operator*(const LongNumber &other) const
 LongNumber LongNumber::operator/(const LongNumber &other) const
 {
 
-    if (other.bits.size() == 1 && other.bits[0] == 0) {
+    if (other.bits.size() == 1 && other.bits[0] == 0)
+    {
         throw std::invalid_argument("Division by zero is not allowed.");
     }
 
@@ -471,10 +472,117 @@ LongNumber LongNumber::operator/(const LongNumber &other) const
     return res;
 }
 
+std::string LongNumber::multiplyByTwo(const std::string &s) const
+{
+    std::string result = "";
+    int carry = 0;
+    for (int i = (int)s.size() - 1; i >= 0; --i)
+    {
+        int digit = s[i] - '0';
+        int value = digit * 2 + carry;
+        carry = value / 10;
+        result.push_back(char(value % 10 + '0'));
+    }
+
+    result.push_back(char('0' + carry));
+
+    std::reverse(result.begin(), result.end());
+    return result;
+}
+
+std::string LongNumber::divideByTwo(const std::string &s) const
+{
+    std::string result = "";
+    int carry = 0;
+    for (char c : s)
+    {
+        int digit = c - '0';
+        int value = carry * 10 + digit;
+        carry = value % 2;
+        result.push_back(char('0' + value / 2));
+    }
+    while(carry != 0){
+        carry *= 10;
+        result.push_back(char('0' + carry /2));
+        carry %= 2;
+    }
+    return result;
+}
+
+std::string LongNumber::addTwoStrings(const std::string &num1, const std::string &num2, int type) const
+{
+    int len = std::max(num1.size(), num2.size());
+    std::string a(num1), b(num2);
+    if (type == 0)
+    {
+        a.insert(a.begin(), len - num1.size(), '0');
+        b.insert(b.begin(), len - num2.size(), '0');
+    }
+    else
+    {
+        a.insert(a.end(), len - num1.size(), '0');
+        b.insert(b.end(), len - num2.size(), '0');
+    }
+    std::string result = "";
+    int carry = 0;
+    for (int i = len - 1; i >= 0; --i)
+    {
+        int digit1 = (i < a.size() ? a[i] : '0') - '0';
+        int digit2 = (i < b.size() ? b[i] : '0') - '0';
+        int value = digit1 + digit2 + carry;
+        carry = value / 10;
+        value %= 10;
+        result.push_back(char('0' + value));
+    }
+    if(type == 0)
+        result.push_back(char('0' + carry));
+    std::reverse(result.begin(), result.end());
+    return result;
+}
+
 std::string LongNumber::getValue() const
 {
+    std::string int_part = "", frac_part = "";
+    std::string t = "1";
 
+    for (int i = (int)bits.size() - point - 1; i >= 0; --i)
+    {
+        if (bits[i])
+            int_part = addTwoStrings(int_part, t, 0);
 
+        if (i > 0)
+            t = multiplyByTwo(t);
+
+        while (t[0] == '0')
+            t.erase(t.begin());
+
+        while (int_part[0] == '0')
+            int_part.erase(int_part.begin());
+    }
+
+    t = "5";
+    for (int i = (int)bits.size() - point; i < (int)bits.size(); ++i)
+    {
+        if (bits[i])
+            frac_part = addTwoStrings(frac_part, t, 1);
+
+        if (i < bits.size() - 1)
+            t = divideByTwo(t);
+
+        while (t.back() == '0')
+            t.pop_back();
+
+        while (frac_part.back() == '0')
+            frac_part.pop_back();
+    }
+
+    while (int_part[0] == '0')
+        int_part.erase(int_part.begin());
+
+    while (frac_part.back() == '0')
+        frac_part.pop_back();
+
+    return int_part + "." + frac_part;
 }
 
 std::ostream &operator<<(std::ostream &out, const LongNumber &number)
@@ -497,3 +605,141 @@ LongNumber operator""_longnum(long double number)
     return LongNumber(number, Max_Precision);
 }
 
+// int main()
+// {
+//     {
+//         LongNumber num1(123.456789, 60);
+//         LongNumber num2(987.654321, 60);
+//         LongNumber res = num1 + num2;
+//         double expected = 1111.11111;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(1000.123456, 40);
+//         LongNumber num2(500.54321, 40);
+//         LongNumber res = num1 - num2;
+//         double expected = 499.580246;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(12.3456789, 40);
+//         LongNumber num2(9.87654321, 40);
+//         LongNumber res = num1 * num2;
+//         double expected = 121.932631;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(1000.0, 40);
+//         LongNumber num2(3.0, 40);
+//         LongNumber res = num1 / num2;
+//         double expected = 333.333333;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(1982.23487297, 100);
+//         LongNumber num2(87284.187391, 100);
+//         LongNumber res = num1 / num2;
+//         double expected = 0.022725849;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(192.23487297, 60);
+//         LongNumber num2(8784.187391, 60);
+//         LongNumber res = num1 * num2;
+//         double expected = 1688627.1472535606;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(87284.187391, 40);
+//         LongNumber num2(0.000123456, 40);
+//         LongNumber res = num1 * num2;
+//         double expected = 10.77575663;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(1.000123456, 40);
+//         LongNumber num2(1.000987654, 40);
+//         LongNumber res = num1 * num2;
+//         double expected = 1.001111577626;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(0.0, 40);
+//         LongNumber num2(123.456789, 40);
+//         LongNumber res = num1 + num2;
+//         double expected = 123.456789;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(123.456789, 40);
+//         LongNumber num2(0.0, 40);
+//         LongNumber res = num1 * num2;
+//         double expected = 0.0;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(0.0, 40);
+//         LongNumber num2(123.456789, 40);
+//         LongNumber res = num1 / num2;
+//         double expected = 0.0;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(1e6, 40);
+//         LongNumber num2(1e6, 40);
+//         LongNumber res = num1 + num2;
+//         double expected = 2000000.0;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(1e-6, 40);
+//         LongNumber num2(1e-6, 40);
+//         LongNumber res = num1 + num2;
+//         double expected = 2e-6;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(1.000123456, 40);
+//         LongNumber num2(1.000987654, 40);
+//         LongNumber res = num1 / num2;
+//         double expected = 0.99913665468;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(355.0, 40);
+//         LongNumber num2(113.0, 40);
+//         LongNumber res = num1 / num2;
+//         double expected = 3.1415929203539825;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+
+//     {
+//         LongNumber num1(22.0, 40);
+//         LongNumber num2(7.0, 40);
+//         LongNumber res = num1 / num2;
+//         double expected = 3.142857142857143;
+//         std::cout << "Result: " << res.getValue() << "\n";
+//     }
+// }
+
+/*
+g++ -c LongNumber.cpp -o LongNumber.o
+ar cr LongNumber.a LongNumber.o
+g++ -c Tests.cpp -o Tests.o
+g++ Tests.o LongNumber.a -o Tests.exe
+
+*/
