@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "stdexcept": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "vector": "cpp",
+        "chrono": "cpp",
+        "utility": "cpp",
+        "iomanip": "cpp"
     }
 }

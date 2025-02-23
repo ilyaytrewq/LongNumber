@@ -10,20 +10,18 @@
 LongNumber::LongNumber()
 {
     sign = true;
-    point = 0;
-    bits.push_back(0);
+    bits.insert(bits.end(), precision + 1, 0);
     precision = Max_Precision;
 }
 
 LongNumber::LongNumber(int number, unsigned int _precision)
 {
     sign = (number >= 0);
-    point = 0;
     precision = _precision;
 
     if (number == 0)
     {
-        bits.push_back(0);
+        bits.insert(bits.end(), precision + 1, 0);
         return;
     }
 
@@ -35,18 +33,17 @@ LongNumber::LongNumber(int number, unsigned int _precision)
     }
 
     std::reverse(bits.begin(), bits.end());
+
+    bits.insert(bits.end(), precision, 0);
 }
 
 LongNumber::LongNumber::LongNumber(double number, unsigned int _precision)
 {
-
     precision = _precision;
     sign = (number >= 0);
-    point = 0;
-    bits.push_back(0);
-
     if (number == 0)
     {
+        bits.insert(bits.end(), precision + 1, 0);
         return;
     }
     if (number < 0)
@@ -54,33 +51,36 @@ LongNumber::LongNumber::LongNumber(double number, unsigned int _precision)
     int exp;
     double mnt = std::frexp(number, &exp);
 
-    while (mnt != 0 && point < 2 * (precision + abs(exp)))
+    int it = 0;
+    while (mnt != 0.0 && int(bits.size()) <= precision + exp)
     {
         mnt *= 2;
         int bit = static_cast<int>(mnt);
         bits.push_back(bit);
         mnt -= bit;
-        point++;
+        it++;
     }
 
-    if (exp < 0)
-        *this = *this >> -exp;
-    else
-        *this = *this << exp;
+    if (int(bits.size()) <= precision + exp)
+    {
+        bits.insert(bits.end(), precision + exp - (int)bits.size(), 0);
+    }
+
+    if (bits.size() < precision + 1)
+    {
+        bits.insert(bits.begin(), precision + 1 - (int)bits.size(), 0);
+    }
 
     Normalize();
 }
 
 LongNumber::LongNumber::LongNumber(long double number, unsigned int _precision)
 {
-
     precision = _precision;
     sign = (number >= 0);
-    point = 0;
-    bits.push_back(0);
-
     if (number == 0)
     {
+        bits.insert(bits.end(), precision, 0);
         return;
     }
     if (number < 0)
@@ -88,52 +88,32 @@ LongNumber::LongNumber::LongNumber(long double number, unsigned int _precision)
     int exp;
     long double mnt = std::frexp(number, &exp);
 
-    while (mnt != 0 && point < 2 * (precision + abs(exp)))
+    int it = 0;
+    while (mnt != 0 && (int)bits.size() - exp <= precision)
     {
         mnt *= 2;
         int bit = static_cast<int>(mnt);
         bits.push_back(bit);
         mnt -= bit;
-        point++;
+        it++;
     }
 
-    if (exp < 0)
-        *this = *this >> -exp;
-    else
-        *this = *this << exp;
-
-    Normalize();
-}
-
-LongNumber::LongNumber(std::string s, unsigned int _precicsion)
-{
-    if (s[0] == '-')
-        sign = false;
-    else
-        sign = true;
-
-    precision = _precicsion;
-    for (char bit : s)
+    if ((int)bits.size() - exp <= precision)
     {
-        if (bit == '.')
-        {
-            point = 0;
-            continue;
-        }
-
-        bits.push_back(bit - '0');
-        point++;
-
-        if (point == precision)
-            break;
+        bits.insert(bits.end(), precision + exp - (int)bits.size(), 0);
     }
+
+    if (bits.size() < precision + 1)
+    {
+        bits.insert(bits.begin(), precision + 1 - (int)bits.size(), 0);
+    }
+    Normalize();
 }
 
 LongNumber::LongNumber(const LongNumber &other)
 {
     bits = other.bits;
     precision = other.precision;
-    point = other.point;
     sign = other.sign;
 }
 
@@ -145,21 +125,18 @@ LongNumber::~LongNumber()
 
 int LongNumber::get_magnitude() const
 {
-    return (int)bits.size() - point;
+    return (int)bits.size() - precision;
 }
 
 void LongNumber::make_fixed_precision(unsigned int _precision)
 {
-    while (_precision < point)
+    if (_precision < precision)
     {
-        point--;
-        bits.pop_back();
+        bits.erase(bits.end() - (precision - _precision), bits.end());
     }
-
-    while (point < _precision)
+    else
     {
-        point++;
-        bits.push_back(0);
+        bits.insert(bits.end(), _precision - precision, 0);
     }
 
     precision = _precision;
@@ -167,8 +144,7 @@ void LongNumber::make_fixed_precision(unsigned int _precision)
 
 void LongNumber::make_fixed_magnitude(unsigned int magn)
 {
-    while (get_magnitude() < magn)
-        bits.insert(bits.begin(), 0);
+    bits.insert(bits.begin(), std::max((unsigned int)0, magn - get_magnitude()), 0);
 }
 
 void LongNumber::make_fixed(unsigned int magn, unsigned int _precision)
@@ -181,26 +157,22 @@ LongNumber &LongNumber::operator=(const LongNumber &other)
 {
     bits = other.bits;
     precision = other.precision;
-    point = other.point;
     sign = other.sign;
     return *this;
 }
 
 bool LongNumber::operator==(const LongNumber &other) const
 {
-    if (bits.size() != other.bits.size()) // что делать если разный precision?
-        return false;
+    // if (bits.size() != other.bits.size())
+    //     return false;
 
-    if (point != other.point)
-        return false;
+    // for (int i = 0; i < (int)bits.size(); ++i)
+    // {
+    //     if (bits[i] != other.bits[i])
+    //         return false;
+    // }
 
-    for (int i = 0; i < (int)bits.size(); ++i)
-    {
-        if (bits[i] != other.bits[i])
-            return false;
-    }
-
-    return true;
+    return bits == other.bits;
 }
 
 bool LongNumber::operator!=(const LongNumber &other) const
@@ -213,12 +185,13 @@ bool LongNumber::operator<(const LongNumber &other) const
     if (get_magnitude() != other.get_magnitude())
         return get_magnitude() < other.get_magnitude();
 
-    for (int i = 0; i < (int)bits.size(); ++i)
-    {
-        if (bits[i] != other.bits[i])
-            return bits[i] < other.bits[i];
-    }
-    return false;
+    // for (int i = 0; i < (int)bits.size(); ++i)
+    // {
+    //     if (bits[i] != other.bits[i])
+    //         return bits[i] < other.bits[i];
+    // }
+
+    return bits < other.bits;
 }
 
 bool LongNumber::operator<=(const LongNumber &other) const
@@ -245,15 +218,24 @@ LongNumber LongNumber::negative(const LongNumber &number) const
 
 void LongNumber::Normalize()
 {
-    while (point > precision || (point > 0 && bits.back() == false))
+    int pos = -1;
+    for (int i = 0; i < get_magnitude() - 1; ++i)
     {
-        bits.pop_back();
-        point--;
+        if (bits[i] > 0)
+        {
+            break;
+        }
+        pos = i;
     }
-    while (get_magnitude() > 1 && bits[0] == false)
-    {
-        bits.erase(bits.begin());
-    }
+    if (pos == -1)
+        return;
+
+    bits.erase(bits.begin(), bits.begin() + pos + 1);
+
+    // while (get_magnitude() > 1 && bits[0] == false)
+    // {
+    //     bits.erase(bits.begin());
+    // }
 }
 
 LongNumber LongNumber::sum_of_positive(const LongNumber &number1, const LongNumber &number2) const
@@ -261,23 +243,24 @@ LongNumber LongNumber::sum_of_positive(const LongNumber &number1, const LongNumb
     unsigned int new_precision = std::max(number1.precision, number2.precision);
     unsigned int new_magnitude = std::max(number1.get_magnitude(), number2.get_magnitude());
 
-    LongNumber first(number1), second(number2), ans;
+    LongNumber first(number1), second(number2), ans(0, new_precision);
 
     first.make_fixed(new_magnitude, new_precision);
     second.make_fixed(new_magnitude, new_precision);
-    ans.make_fixed(new_magnitude, new_precision);
+    ans.make_fixed_magnitude(new_magnitude + 1);
 
     unsigned int carry = 0;
     for (int i = (int)first.bits.size() - 1; i >= 0; --i)
     {
-        ans.bits[i] = (first.bits[i] ^ second.bits[i] ^ carry);
+        ans.bits[i + 1] = (first.bits[i] ^ second.bits[i] ^ carry);
         carry = (first.bits[i] + second.bits[i] + carry) >> 1;
     }
 
-    if (carry)
-    {
-        ans.bits.insert(ans.bits.begin(), 1);
-    }
+    ans.bits[0] = carry;
+    // if (carry)
+    // {
+    //     ans.bits.insert(ans.bits.begin(), 1);
+    // }
 
     ans.Normalize();
 
@@ -289,7 +272,7 @@ LongNumber LongNumber::diff_of_positive(const LongNumber &number1, const LongNum
     unsigned int new_precision = std::max(number1.precision, number2.precision);
     unsigned int new_magnitude = std::max(number1.get_magnitude(), number2.get_magnitude());
 
-    LongNumber first(number1), second(number2), ans;
+    LongNumber first(number1), second(number2), ans(0, 0);
 
     first.make_fixed(new_magnitude, new_precision);
     second.make_fixed(new_magnitude, new_precision);
@@ -378,11 +361,15 @@ LongNumber LongNumber::operator<<(unsigned int shift) const
 
 LongNumber LongNumber::operator>>(unsigned int shift) const
 {
+    if (shift >= (int)bits.size())
+        return LongNumber(0, precision);
+
     LongNumber ans(*this);
 
-    ans.point += shift;
+    ans.bits.erase(ans.bits.end() - shift, ans.bits.end());
 
-    ans.bits.insert(ans.bits.begin(), shift, 0);
+    if (ans.get_magnitude() < shift)
+        ans.bits.insert(ans.bits.begin(), shift - ans.get_magnitude(), 0);
 
     ans.Normalize();
 
@@ -394,27 +381,27 @@ LongNumber LongNumber::operator*(const LongNumber &other) const
     int mx_prec = std::max(precision, other.precision);
 
     LongNumber res(0, mx_prec);
-    LongNumber first(*this), second(other);
 
-    first.make_fixed_precision(mx_prec);
+    LongNumber num(*this);
+    num.make_fixed_precision(mx_prec);
 
-    first.sign = second.sign = true;
-
-    LongNumber tmp(first);
-
-    for (int i = (int)second.bits.size() - second.point - 1; i >= 0; --i)
+    for (int i = (int)other.bits.size() - other.precision - 1; i >= 0; --i)
     {
-        if (second.bits[i])
-            res = res + tmp;
-        tmp = tmp << 1;
+        if (other.bits[i])
+            res = res + num;
+
+        num = num << 1;
     }
 
-    tmp = first >> 1;
-    for (int i = (int)second.bits.size() - second.point; i < (int)second.bits.size(); ++i)
+    num = *this >> 1;
+    num.make_fixed_precision(mx_prec);
+
+    for (int i = (int)other.bits.size() - other.precision; i < (int)other.bits.size(); ++i)
     {
-        if (second.bits[i])
-            res = res + tmp;
-        tmp = tmp >> 1;
+        if (other.bits[i])
+            res = res + num;
+
+        num = num >> 1;
     }
 
     // for (int i = 0; i < (int)second.bits.size(); ++i)
@@ -444,7 +431,7 @@ LongNumber LongNumber::operator*(const LongNumber &other) const
 LongNumber LongNumber::operator/(const LongNumber &other) const
 {
 
-    if (other.bits.size() == 1 && other.bits[0] == 0)
+    if (other.bits.size() == 1 + other.precision && other.bits[0] == 0)
     {
         throw std::invalid_argument("Division by zero is not allowed.");
     }
@@ -455,16 +442,24 @@ LongNumber LongNumber::operator/(const LongNumber &other) const
 
     LongNumber res(0, max_precision);
 
-    dividend = dividend << divisor.point;
-    divisor = divisor << divisor.point;
-
     divisor.sign = true;
     dividend.sign = true;
 
-    dividend.make_fixed_precision(max_precision);
+    if (dividend.precision >= divisor.precision)
+    {
+        dividend.precision -= divisor.precision;
+    }
+    else
+    {
+        dividend.bits.insert(dividend.bits.end(), divisor.precision - dividend.precision, 0);
+        dividend.precision = 0;
+    }
 
-    LongNumber temp(0, max_precision);
+    dividend.bits.insert(dividend.bits.end(), max_precision - dividend.precision, 0);
+    dividend.precision = max_precision;
+    divisor.precision = 0;
 
+    LongNumber temp(0, 0);
     for (int i = 0; i < (int)dividend.bits.size(); ++i)
     {
         temp = temp << 1;
@@ -479,10 +474,9 @@ LongNumber LongNumber::operator/(const LongNumber &other) const
         {
             res.bits.push_back(false);
         }
-        if (i >= dividend.bits.size() - dividend.point)
-            res.point++;
     }
 
+    res.precision = dividend.precision;
     res.sign = (this->sign == other.sign);
     res.Normalize();
     return res;
@@ -562,7 +556,7 @@ std::string LongNumber::getValue() const
     std::string int_part = "", frac_part = "";
     std::string t = "1";
 
-    for (int i = (int)bits.size() - point - 1; i >= 0; --i)
+    for (int i = (int)bits.size() - precision - 1; i >= 0; --i)
     {
         if (bits[i])
             int_part = addTwoStrings(int_part, t, 0);
@@ -578,7 +572,7 @@ std::string LongNumber::getValue() const
     }
 
     t = "5";
-    for (int i = (int)bits.size() - point; i < (int)bits.size(); ++i)
+    for (int i = (int)bits.size() - precision; i < (int)bits.size(); ++i)
     {
         if (bits[i])
             frac_part = addTwoStrings(frac_part, t, 1);
@@ -633,11 +627,17 @@ LongNumber operator""_longnum(long double number)
 
 //     std::cout.precision(40);
 
-//     while(1){
+//     while (1)
+//     {
 //         double a, b;
 //         std::cin >> a >> b;
 //         std::cout << a * b << '\n';
-//         std::cout << LongNumber(a, 100) * LongNumber(b, 100) << '\n';
+//         LongNumber A(a, 100), B(b, 100);
+//         // std::cout << A << '\n'
+//         //           << B << '\n';
+//         std::cout << A * B << '\n';
+//         std::cout << a / b << '\n';
+//         std::cout << A / B << '\n';
 //     }
 
 //     {
@@ -769,10 +769,10 @@ LongNumber operator""_longnum(long double number)
 //     }
 // }
 
-/*
-g++ -c LongNumber.cpp -o LongNumber.o
-ar cr LongNumber.a LongNumber.o
-g++ -c Tests.cpp -o Tests.o
-g++ Tests.o LongNumber.a -o Tests.exe
+// /*
+// g++ -c LongNumber.cpp -o LongNumber.o
+// ar cr LongNumber.a LongNumber.o
+// g++ -c Tests.cpp -o Tests.o
+// g++ Tests.o LongNumber.a -o Tests.exe
 
-*/
+// */

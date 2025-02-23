@@ -11,7 +11,6 @@ class LongNumber
 {
 private:
     std::vector<char> bits;
-    unsigned int point;
     unsigned int precision;
     bool sign;
 
@@ -46,8 +45,6 @@ public:
     LongNumber(double, unsigned int = Max_Precision);
 
     LongNumber(long double, unsigned int = Max_Precision);
-
-    LongNumber(std::string, unsigned int = Max_Precision);
 
     LongNumber(const LongNumber &other);
 
