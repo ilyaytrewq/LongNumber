@@ -24,11 +24,6 @@ LongNumber computePi(unsigned int precision)
 
     LongNumber eight(8, precision);
 
-    if (precision == 0)
-    {
-        pi = pi + LongNumber(3, precision);
-    }
-
     for (auto k = 0; k < precision; ++k)
     {
         pi = pi + n0 * (a0 / a - b0 / b - c0 / c - d0 / d);
@@ -38,6 +33,12 @@ LongNumber computePi(unsigned int precision)
         c = c + eight;
         d = d + eight;
     }
+
+    if (precision == 0)
+    {
+        pi = pi + LongNumber(3, precision);
+    }
+
 
     return pi;
 }
@@ -52,13 +53,18 @@ int main(int argc, char *argv[])
 
     unsigned int precision = std::stoi(argv[1]);
 
-    LongNumber pi = computePi(precision * 4);
+    LongNumber pi = computePi(int(1.0 * precision * 3.5));
 
-    std::cout << pi << '\n'
-              << pi.getValue() << '\n';
+
+    std::cout << pi << '\n';
 
     return 0;
 }
+
+/*
+3,14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651 3282306647 0938446095 5058223172 5359408128 4811174502 8410270193 8521105559 64
+3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798212942433927391720921467351410919755706319241522390790866788557093228984398881279661794504411652995879644050496276312097267816222312604450098499964995464604664127052931721121726068245790527026097133448173854587681663730336367734707891941070556640625
+*/
 
 /*
 g++ -c LongNumber.cpp -o LongNumber.o

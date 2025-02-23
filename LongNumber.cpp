@@ -54,7 +54,7 @@ LongNumber::LongNumber::LongNumber(double number, unsigned int _precision)
     int exp;
     double mnt = std::frexp(number, &exp);
 
-    while (mnt != 0 && bits.size() < 2 * (precision + abs(exp)))
+    while (mnt != 0 && point < 2 * (precision + abs(exp)))
     {
         mnt *= 2;
         int bit = static_cast<int>(mnt);
@@ -88,7 +88,7 @@ LongNumber::LongNumber::LongNumber(long double number, unsigned int _precision)
     int exp;
     long double mnt = std::frexp(number, &exp);
 
-    while (mnt != 0 && bits.size() < 2 * (precision + abs(exp)))
+    while (mnt != 0 && point < 2 * (precision + abs(exp)))
     {
         mnt *= 2;
         int bit = static_cast<int>(mnt);
@@ -397,27 +397,43 @@ LongNumber LongNumber::operator*(const LongNumber &other) const
     LongNumber first(*this), second(other);
 
     first.make_fixed_precision(mx_prec);
-    second.make_fixed_precision(mx_prec);
 
     first.sign = second.sign = true;
 
-    for (int i = 0; i < (int)second.bits.size(); ++i)
+    LongNumber tmp(first);
+
+    for (int i = (int)second.bits.size() - second.point - 1; i >= 0; --i)
     {
-        if (second.bits[i] == false)
-            continue;
-
-        int shift = ((int)second.bits.size() - second.point - 1) - i;
-
-        if (shift >= 0)
-        {
-            res = res + (first << shift);
-        }
-        else
-        {
-            shift = -shift;
-            res = res + (first >> shift);
-        }
+        if (second.bits[i])
+            res = res + tmp;
+        tmp = tmp << 1;
     }
+
+    tmp = first >> 1;
+    for (int i = (int)second.bits.size() - second.point; i < (int)second.bits.size(); ++i)
+    {
+        if (second.bits[i])
+            res = res + tmp;
+        tmp = tmp >> 1;
+    }
+
+    // for (int i = 0; i < (int)second.bits.size(); ++i)
+    // {
+    //     if (second.bits[i] == false)
+    //         continue;
+
+    //     int shift = ((int)second.bits.size() - second.point - 1) - i;
+
+    //     if (shift >= 0)
+    //     {
+    //         res = res + (first << shift);
+    //     }
+    //     else
+    //     {
+    //         shift = -shift;
+    //         res = res + (first >> shift);
+    //     }
+    // }
 
     res.sign = (sign == other.sign);
     res.Normalize();
@@ -501,9 +517,10 @@ std::string LongNumber::divideByTwo(const std::string &s) const
         carry = value % 2;
         result.push_back(char('0' + value / 2));
     }
-    while(carry != 0){
+    while (carry != 0)
+    {
         carry *= 10;
-        result.push_back(char('0' + carry /2));
+        result.push_back(char('0' + carry / 2));
         carry %= 2;
     }
     return result;
@@ -534,7 +551,7 @@ std::string LongNumber::addTwoStrings(const std::string &num1, const std::string
         value %= 10;
         result.push_back(char('0' + value));
     }
-    if(type == 0)
+    if (type == 0)
         result.push_back(char('0' + carry));
     std::reverse(result.begin(), result.end());
     return result;
@@ -582,15 +599,21 @@ std::string LongNumber::getValue() const
     while (frac_part.back() == '0')
         frac_part.pop_back();
 
+    if (int_part.empty())
+        int_part = "0";
+    if (frac_part.empty())
+        frac_part = "0";
+
     return int_part + "." + frac_part;
 }
 
 std::ostream &operator<<(std::ostream &out, const LongNumber &number)
 {
-    out << "sign = " << number.sign << ' ' << "point = " << number.point << ' ' << "precision = " << number.precision << '\n';
-    for (auto i : number.bits)
-        out << i;
-    long long ans = 0;
+    out << number.getValue();
+    // out << "sign = " << number.sign << ' ' << "point = " << number.point << ' ' << "precision = " << number.precision << '\n';
+    // for (auto i : number.bits)
+    //     out << i;
+    // long long ans = 0;
     // for (auto i : number.bits)
     // {
     //     ans *= 2;
@@ -607,6 +630,16 @@ LongNumber operator""_longnum(long double number)
 
 // int main()
 // {
+
+//     std::cout.precision(40);
+
+//     while(1){
+//         double a, b;
+//         std::cin >> a >> b;
+//         std::cout << a * b << '\n';
+//         std::cout << LongNumber(a, 100) * LongNumber(b, 100) << '\n';
+//     }
+
 //     {
 //         LongNumber num1(123.456789, 60);
 //         LongNumber num2(987.654321, 60);
@@ -643,7 +676,7 @@ LongNumber operator""_longnum(long double number)
 //         LongNumber num1(1982.23487297, 100);
 //         LongNumber num2(87284.187391, 100);
 //         LongNumber res = num1 / num2;
-//         double expected = 0.022725849;
+//         double expected = 0.022710125765281412;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 

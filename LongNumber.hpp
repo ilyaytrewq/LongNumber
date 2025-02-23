@@ -10,7 +10,7 @@
 class LongNumber
 {
 private:
-    std::vector<bool> bits;
+    std::vector<char> bits;
     unsigned int point;
     unsigned int precision;
     bool sign;
