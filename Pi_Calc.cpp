@@ -1,6 +1,7 @@
 #include "LongNumber.hpp"
 #include "TimeGuard.hpp"
 #include <iostream>
+#include <string>
 #include <iomanip>
 #include <cmath>
 

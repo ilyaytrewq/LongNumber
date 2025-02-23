@@ -378,6 +378,33 @@ LongNumber LongNumber::operator>>(unsigned int shift) const
 
 LongNumber LongNumber::operator*(const LongNumber &other) const
 {
+    //     int new_precision = precision + other.precision;
+    //     int size = bits.size() + other.bits.size();
+
+    //     LongNumber res;
+    //     res.bits.assign(size, 0);
+
+    //     for (int i = (int)bits.size() - 1; i >= 0; --i)
+    //     {
+    //         int carry = 0;
+    //         for (int j = (int)other.bits.size() - 1; j >= 0; --j)
+    //         {
+    //             int product = bits[i] * other.bits[i] + res.bits[i + j + 1] + carry;
+    //             res.bits[i + j + 1] = product & 1;
+    //             carry = product >> 1;
+    //         }
+    //         res.bits[i] = carry;
+    //     }
+
+    //     // res.precision = std::max(precision, other.precision);
+    //     res.precision = new_precision;
+    //     res.sign = (sign == other.sign);
+    //     // res.bits.erase(res.bits.end() - (precision + other.precision - res.precision), res.bits.end());
+
+    //     res.Normalize();
+
+    //     return res;
+
     int mx_prec = std::max(precision, other.precision);
 
     LongNumber res(0, mx_prec);
@@ -404,25 +431,6 @@ LongNumber LongNumber::operator*(const LongNumber &other) const
         num = num >> 1;
     }
 
-    // for (int i = 0; i < (int)second.bits.size(); ++i)
-    // {
-    //     if (second.bits[i] == false)
-    //         continue;
-
-    //     int shift = ((int)second.bits.size() - second.point - 1) - i;
-
-    //     if (shift >= 0)
-    //     {
-    //         res = res + (first << shift);
-    //     }
-    //     else
-    //     {
-    //         shift = -shift;
-    //         res = res + (first >> shift);
-    //     }
-    // }
-
-    res.sign = (sign == other.sign);
     res.Normalize();
 
     return res;
@@ -462,8 +470,10 @@ LongNumber LongNumber::operator/(const LongNumber &other) const
     LongNumber temp(0, 0);
     for (int i = 0; i < (int)dividend.bits.size(); ++i)
     {
-        temp = temp << 1;
-        temp.bits[(int)temp.bits.size() - 1] = dividend.bits[i];
+        if (temp.bits.size() > 1 || temp.bits[0] > 0)
+            temp.bits.emplace_back(0);
+        if (dividend.bits[i])
+            temp.bits[(int)temp.bits.size() - 1] = dividend.bits[i];
 
         if (temp >= divisor)
         {
@@ -632,7 +642,7 @@ LongNumber operator""_longnum(long double number)
 //         double a, b;
 //         std::cin >> a >> b;
 //         std::cout << a * b << '\n';
-//         LongNumber A(a, 100), B(b, 100);
+//         LongNumber A(a, 2), B(b, 2);
 //         // std::cout << A << '\n'
 //         //           << B << '\n';
 //         std::cout << A * B << '\n';
