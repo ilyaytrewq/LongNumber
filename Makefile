@@ -1,13 +1,19 @@
 PRECISION ?= 100
 
 default_target:
- cmake . -B build && cd build && make
+	cmake -S . -B build && cd build && make
 
 main:
- cd build && ./main
+	cd build && ./main
 
 pi:
- cd build && ./pi --precision=$(PRECISION)
+	cd build && ./pi $(PRECISION)
 
 test:
- cd build && ./test
+	cd build && ./test
+
+# Очистка сборочных файлов
+clean:
+	rm -rf build
+
+.PHONY: default_target main pi test clean

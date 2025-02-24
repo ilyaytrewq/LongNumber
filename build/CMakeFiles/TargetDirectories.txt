@@ -1,0 +1,8 @@
+/home/ilyaytrewq/code/LongNumber/build/CMakeFiles/main.dir
+/home/ilyaytrewq/code/LongNumber/build/CMakeFiles/pi.dir
+/home/ilyaytrewq/code/LongNumber/build/CMakeFiles/test.dir
+/home/ilyaytrewq/code/LongNumber/build/CMakeFiles/edit_cache.dir
+/home/ilyaytrewq/code/LongNumber/build/CMakeFiles/rebuild_cache.dir
+/home/ilyaytrewq/code/LongNumber/build/LongNumber/CMakeFiles/LongNumber.dir
+/home/ilyaytrewq/code/LongNumber/build/LongNumber/CMakeFiles/edit_cache.dir
+/home/ilyaytrewq/code/LongNumber/build/LongNumber/CMakeFiles/rebuild_cache.dir

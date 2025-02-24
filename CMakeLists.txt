@@ -16,4 +16,5 @@ target_link_libraries(pi)
 target_link_libraries(pi LongNumber)
 
 add_executable(test Tests.cpp)
+target_link_libraries(test)
 target_link_libraries(test LongNumber)

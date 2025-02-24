@@ -7,26 +7,13 @@
 
 #define Max_Precision 1000
 
-/*
-Tests
-
-First test
-12.9253 65.893873534
-
-+) 1001110.1101000110
--) -110100.1111011111
-*) 1101010011.1011001010
-/) 0.0011001000
-
-*/
-
 int main() {
     int n;
     std::cin >> n;
     for(int i = 0; i < n; ++i){
         long double a, b;
         std::cin >> a >> b;
-        LongNumber A(a, 20), B(b, 20);
+        LongNumber A(a, 100), B(b, 100);
         std::cout << "Numbers A and B\n";
         std::cout << A << '\n' << B << '\n';
         std::cout << "A + B\n" << A + B << '\n';
