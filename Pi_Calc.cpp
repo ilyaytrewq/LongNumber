@@ -10,6 +10,9 @@
 // Функция для вычисления числа Пи с помощью ряда Лейбница
 LongNumber computePi(unsigned int precision)
 {
+    if(precision == 0)
+        return LongNumber(3, precision);
+
     LongNumber pi(0, precision);
     LongNumber n0{1, precision};
     LongNumber n(16, precision);
@@ -34,14 +37,8 @@ LongNumber computePi(unsigned int precision)
         b = b + eight;
         c = c + eight;
         d = d + eight;
+        // std::cout << a0 << '\n' << a << '\n';
     }
-
-    if (precision == 0)
-    {
-        pi = pi + LongNumber(3, precision);
-    }
-
-
     return pi;
 }
 
@@ -53,14 +50,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    const std::string PI = "3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095";
+
     std::string message = "Pi calculation end";
     TimerGuard start(message, std::cout);
+
     unsigned int precision = std::stoi(argv[1]);
 
-    LongNumber pi = computePi(int(1.0 * precision * 3.5));
+    LongNumber pi = computePi(precision * 3.5);
 
-
-    std::cout << pi << '\n';
+    std::cout << pi.getValue().substr(0, precision + 2) << '\n';
+    std::cout << (pi.getValue().substr(0, precision + 2) == PI.substr(0, precision + 2) ? "OK\n" : "FAIL\n");
 
     return 0;
 }

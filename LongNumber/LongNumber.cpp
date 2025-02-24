@@ -132,7 +132,7 @@ void LongNumber::make_fixed_precision(unsigned int _precision)
 {
     if (_precision < precision)
     {
-        bits.erase(bits.end() - (precision - _precision), bits.end());
+        bits.resize(bits.size() - (precision - _precision));
     }
     else
     {
@@ -218,6 +218,10 @@ LongNumber LongNumber::negative(const LongNumber &number) const
 
 void LongNumber::Normalize()
 {
+    if(bits[0] == 1)
+        return;
+
+
     int pos = -1;
     for (int i = 0; i < get_magnitude() - 1; ++i)
     {
@@ -227,15 +231,8 @@ void LongNumber::Normalize()
         }
         pos = i;
     }
-    if (pos == -1)
-        return;
 
     bits.erase(bits.begin(), bits.begin() + pos + 1);
-
-    // while (get_magnitude() > 1 && bits[0] == false)
-    // {
-    //     bits.erase(bits.begin());
-    // }
 }
 
 LongNumber LongNumber::sum_of_positive(const LongNumber &number1, const LongNumber &number2) const
@@ -257,11 +254,6 @@ LongNumber LongNumber::sum_of_positive(const LongNumber &number1, const LongNumb
     }
 
     ans.bits[0] = carry;
-    // if (carry)
-    // {
-    //     ans.bits.insert(ans.bits.begin(), 1);
-    // }
-
     ans.Normalize();
 
     return ans;
@@ -453,26 +445,44 @@ LongNumber LongNumber::operator/(const LongNumber &other) const
     divisor.sign = true;
     dividend.sign = true;
 
-    if (dividend.precision >= divisor.precision)
+    int cnt = divisor.precision;
+    for(int i = divisor.bits.size() - 1; i >= divisor.bits.size() - divisor.precision; --i){
+        if(divisor.bits[i] == 1)
+            break;
+        cnt--;
+    }
+
+    divisor.bits.resize(divisor.bits.size() - (divisor.precision - cnt));
+
+    if (dividend.precision >= cnt)
     {
-        dividend.precision -= divisor.precision;
+        dividend.precision -= cnt;
     }
     else
     {
-        dividend.bits.insert(dividend.bits.end(), divisor.precision - dividend.precision, 0);
+        dividend.bits.insert(dividend.bits.end(), cnt - dividend.precision, 0);
         dividend.precision = 0;
     }
 
-    dividend.bits.insert(dividend.bits.end(), max_precision - dividend.precision, 0);
+    int add = max_precision - dividend.precision;
     dividend.precision = max_precision;
     divisor.precision = 0;
 
     LongNumber temp(0, 0);
-    for (int i = 0; i < (int)dividend.bits.size(); ++i)
+
+
+    for (int i = 0; i < (int)divisor.bits.size() - 1; ++i)
+    {
+        temp.bits.push_back(dividend.bits[i]);
+    }
+    temp.Normalize();
+
+
+    for (int i = (int)divisor.bits.size() - 1; i < (int)dividend.bits.size() + add; ++i)
     {
         if (temp.bits.size() > 1 || temp.bits[0] > 0)
-            temp.bits.emplace_back(0);
-        if (dividend.bits[i])
+            temp.bits.push_back(0);
+        if (i < dividend.bits.size() && dividend.bits[i])
             temp.bits[(int)temp.bits.size() - 1] = dividend.bits[i];
 
         if (temp >= divisor)
@@ -614,16 +624,6 @@ std::string LongNumber::getValue() const
 std::ostream &operator<<(std::ostream &out, const LongNumber &number)
 {
     out << number.getValue();
-    // out << "sign = " << number.sign << ' ' << "point = " << number.point << ' ' << "precision = " << number.precision << '\n';
-    // for (auto i : number.bits)
-    //     out << i;
-    // long long ans = 0;
-    // for (auto i : number.bits)
-    // {
-    //     ans *= 2;
-    //     ans += i;
-    // }
-    // out << (number.sign ? 1 : -1) * ans;
     return out;
 }
 
@@ -635,48 +635,48 @@ LongNumber operator""_longnum(long double number)
 // int main()
 // {
 
-//     std::cout.precision(40);
+//     std::cout.precision(100);
 
-//     while (1)
-//     {
-//         double a, b;
-//         std::cin >> a >> b;
-//         std::cout << a * b << '\n';
-//         LongNumber A(a, 2), B(b, 2);
-//         // std::cout << A << '\n'
-//         //           << B << '\n';
-//         std::cout << A * B << '\n';
-//         std::cout << a / b << '\n';
-//         std::cout << A / B << '\n';
-//     }
+//     // while (1)
+//     // {
+//     //     double a, b;
+//     //     std::cin >> a >> b;
+//     //     std::cout << a * b << '\n';
+//     //     LongNumber A(a, 200), B(b, 200);
+//     //     // std::cout << A << '\n'
+//     //     //           << B << '\n';
+//     //     std::cout << A * B << '\n';
+//     //     std::cout << a / b << '\n';
+//     //     std::cout << A / B << '\n';
+//     // }
 
 //     {
-//         LongNumber num1(123.456789, 60);
-//         LongNumber num2(987.654321, 60);
+//         LongNumber num1(123.456789, 100);
+//         LongNumber num2(987.654321, 100);
 //         LongNumber res = num1 + num2;
 //         double expected = 1111.11111;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(1000.123456, 40);
-//         LongNumber num2(500.54321, 40);
+//         LongNumber num1(1000.123456, 100);
+//         LongNumber num2(500.54321, 100);
 //         LongNumber res = num1 - num2;
 //         double expected = 499.580246;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(12.3456789, 40);
-//         LongNumber num2(9.87654321, 40);
+//         LongNumber num1(12.3456789, 100);
+//         LongNumber num2(9.87654321, 100);
 //         LongNumber res = num1 * num2;
 //         double expected = 121.932631;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(1000.0, 40);
-//         LongNumber num2(3.0, 40);
+//         LongNumber num1(1000.0, 100);
+//         LongNumber num2(3.0, 100);
 //         LongNumber res = num1 / num2;
 //         double expected = 333.333333;
 //         std::cout << "Result: " << res.getValue() << "\n";
@@ -699,80 +699,80 @@ LongNumber operator""_longnum(long double number)
 //     }
 
 //     {
-//         LongNumber num1(87284.187391, 40);
-//         LongNumber num2(0.000123456, 40);
+//         LongNumber num1(87284.187391, 100);
+//         LongNumber num2(0.000123456, 100);
 //         LongNumber res = num1 * num2;
 //         double expected = 10.77575663;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(1.000123456, 40);
-//         LongNumber num2(1.000987654, 40);
+//         LongNumber num1(1.000123456, 100);
+//         LongNumber num2(1.000987654, 100);
 //         LongNumber res = num1 * num2;
 //         double expected = 1.001111577626;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(0.0, 40);
-//         LongNumber num2(123.456789, 40);
+//         LongNumber num1(0.0, 100);
+//         LongNumber num2(123.456789, 100);
 //         LongNumber res = num1 + num2;
 //         double expected = 123.456789;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(123.456789, 40);
-//         LongNumber num2(0.0, 40);
+//         LongNumber num1(123.456789, 100);
+//         LongNumber num2(0.0, 100);
 //         LongNumber res = num1 * num2;
 //         double expected = 0.0;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(0.0, 40);
-//         LongNumber num2(123.456789, 40);
+//         LongNumber num1(0.0, 100);
+//         LongNumber num2(123.456789, 100);
 //         LongNumber res = num1 / num2;
 //         double expected = 0.0;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(1e6, 40);
-//         LongNumber num2(1e6, 40);
+//         LongNumber num1(1e6, 100);
+//         LongNumber num2(1e6, 100);
 //         LongNumber res = num1 + num2;
 //         double expected = 2000000.0;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(1e-6, 40);
-//         LongNumber num2(1e-6, 40);
+//         LongNumber num1(1e-6, 100);
+//         LongNumber num2(1e-6, 100);
 //         LongNumber res = num1 + num2;
 //         double expected = 2e-6;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(1.000123456, 40);
-//         LongNumber num2(1.000987654, 40);
+//         LongNumber num1(1.000123456, 100);
+//         LongNumber num2(1.000987654, 100);
 //         LongNumber res = num1 / num2;
 //         double expected = 0.99913665468;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(355.0, 40);
-//         LongNumber num2(113.0, 40);
+//         LongNumber num1(355.0, 100);
+//         LongNumber num2(113.0, 100);
 //         LongNumber res = num1 / num2;
 //         double expected = 3.1415929203539825;
 //         std::cout << "Result: " << res.getValue() << "\n";
 //     }
 
 //     {
-//         LongNumber num1(22.0, 40);
-//         LongNumber num2(7.0, 40);
+//         LongNumber num1(22.0, 100);
+//         LongNumber num2(7.0, 100);
 //         LongNumber res = num1 / num2;
 //         double expected = 3.142857142857143;
 //         std::cout << "Result: " << res.getValue() << "\n";
