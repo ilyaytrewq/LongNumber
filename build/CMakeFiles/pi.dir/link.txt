@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/pi.dir/Pi_Calc.cpp.o -o pi  LongNumber/libLongNumber.a 
+/usr/bin/c++  -O3 -std=c++20 CMakeFiles/pi.dir/Pi_Calc.cpp.o -o pi  LongNumber/libLongNumber.a 

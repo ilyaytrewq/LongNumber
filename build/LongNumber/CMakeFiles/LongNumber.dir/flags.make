@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/ilyaytrewq/code/LongNumber/LongNumber
 
-CXX_FLAGS = -std=gnu++20
+CXX_FLAGS =  -O3 -std=c++20
 
