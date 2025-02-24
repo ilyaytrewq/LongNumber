@@ -12,7 +12,6 @@ pi:
 test:
 	cd build && ./test
 
-# Очистка сборочных файлов
 clean:
 	rm -rf build
 
