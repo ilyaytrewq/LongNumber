@@ -381,6 +381,7 @@ LongNumber LongNumber::operator*(const LongNumber &other) const
         num = num >> 1;
     }
 
+    res.sign = (sign == other.sign);
     res.Normalize();
 
     return res;
