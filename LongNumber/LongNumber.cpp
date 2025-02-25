@@ -577,6 +577,9 @@ std::string LongNumber::getValue() const
     if (frac_part.empty())
         frac_part = "0";
 
+    if(sign == false)
+        int_part = "-" + int_part;
+
     return int_part + "." + frac_part;
 }
 
