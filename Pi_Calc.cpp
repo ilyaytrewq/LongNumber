@@ -5,9 +5,6 @@
 #include <iomanip>
 #include <cmath>
 
-#define Max_Precision 1000
-
-// Функция для вычисления числа Пи с помощью ряда Лейбница
 LongNumber computePi(unsigned int precision)
 {
     if(precision == 0)
@@ -37,7 +34,6 @@ LongNumber computePi(unsigned int precision)
         b = b + eight;
         c = c + eight;
         d = d + eight;
-        // std::cout << a0 << '\n' << a << '\n';
     }
     return pi;
 }

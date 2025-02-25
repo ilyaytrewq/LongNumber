@@ -5,8 +5,6 @@
 #include <cmath>
 #include "LongNumber.hpp"
 
-#define Max_Precision 1000
-
 int main() {
     int n;
     std::cin >> n;
