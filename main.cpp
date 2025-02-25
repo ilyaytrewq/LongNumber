@@ -24,15 +24,3 @@ int main() {
 
     return 0;
 }
-
-
-
-/*
-g++ -c LongNumber.cpp -o LongNumber.o
-ar cr LongNumber.a LongNumber.o
-g++ -c main.cpp -o main.o
-g++ main.o LongNumber.a -o main.exe
-
-*/
-
-

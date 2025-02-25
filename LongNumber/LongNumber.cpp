@@ -89,7 +89,7 @@ LongNumber::LongNumber::LongNumber(long double number, unsigned int _precision)
     long double mnt = std::frexp(number, &exp);
 
     int it = 0;
-    while (mnt != 0 && (int)bits.size() - exp <= precision)
+    while (mnt != 0 && (int)bits.size() <= precision + exp)
     {
         mnt *= 2;
         int bit = static_cast<int>(mnt);
@@ -98,7 +98,7 @@ LongNumber::LongNumber::LongNumber(long double number, unsigned int _precision)
         it++;
     }
 
-    if ((int)bits.size() - exp <= precision)
+    if ((int)bits.size() <= precision + exp)
     {
         bits.insert(bits.end(), precision + exp - (int)bits.size(), 0);
     }
