@@ -56,7 +56,8 @@ int main(int argc, char *argv[])
     LongNumber pi = computePi(precision * 4);
 
     std::cout << pi.getValue().substr(0, precision + 2) << '\n';
-    std::cout << (pi.getValue().substr(0, precision + 2) == PI.substr(0, precision + 2) ? "OK\n" : "FAIL\n");
+    if(precision < PI.size() - 2)
+        std::cout << (pi.getValue().substr(0, precision + 2) == PI.substr(0, precision + 2) ? "OK\n" : "FAIL\n");
 
     return 0;
 }
