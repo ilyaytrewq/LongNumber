@@ -19,6 +19,6 @@ public:
     {
         auto end_time = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-        out << "{" << message << "} {time in milliseconds (" << duration.count() << ")}\n";
+        out <<  message << " time in milliseconds " << duration.count() << "\n";
     }
 };
