@@ -50,10 +50,11 @@
 # Склонировать репозиторий
 git clone https://github.com/ilyaytrewq/LongNumber.git
 cd LongNumber
-
+```
 
 Makefile предоставляет следующие цели:
 
+```
     make — полная сборка (библиотека + тесты + утилита π)
 
     make test — запуск набора юнит-тестов
